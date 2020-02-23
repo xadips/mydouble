@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -11,6 +12,7 @@ public:
     bool sign;
     vector<int> pre;
     vector<int> after;
+
     myDouble();
     ~myDouble();
 };
