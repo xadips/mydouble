@@ -4,8 +4,6 @@
 
 using namespace std;
 
-const char SIGNS[] = {'-', ' '};
-
 class myDouble
 {
 public:
@@ -34,7 +32,6 @@ myDouble::~myDouble()
 int main()
 {
     myDouble a;
-    cout << SIGNS[a.sign] << a.pre[0] << "." << a.after[0] << "\n";
 
     return 0;
 }
