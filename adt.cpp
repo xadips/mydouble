@@ -16,6 +16,7 @@ public:
 
     myDouble();
     ~myDouble();
+    string toStr();
 };
 
 myDouble::myDouble()
@@ -32,17 +33,17 @@ myDouble::~myDouble()
     this->after.clear();
 }
 
-string toStr(myDouble number)
+string myDouble::toStr()
 {
-    if (!number.pre.empty() && !number.after.empty())
+    if (!this->pre.empty() && !this->after.empty())
     {
         stringstream ss;
-        string converted = (number.sign == true) ? "" : "-";
-        copy(number.pre.begin(), number.pre.end(), ostream_iterator<int>(ss));
+        string converted = (this->sign == true) ? "" : "-";
+        copy(this->pre.begin(), this->pre.end(), ostream_iterator<int>(ss));
         converted += ss.str();
         ss.str(".");
         converted += ss.str();
-        copy(number.after.begin(), number.after.end(), ostream_iterator<int>(ss));
+        copy(this->after.begin(), this->after.end(), ostream_iterator<int>(ss));
         converted += ss.str();
 
         return converted;
@@ -53,7 +54,7 @@ string toStr(myDouble number)
 int main()
 {
     myDouble a;
-    cout << toStr(a) << "\n";
+    cout << a.toStr() << "\n";
 
     return 0;
 }
