@@ -16,7 +16,6 @@ public:
 
     myDouble();
     ~myDouble();
-    string toStr();
 };
 
 myDouble::myDouble()
@@ -28,33 +27,59 @@ myDouble::myDouble()
 
 myDouble::~myDouble()
 {
-    delete (&sign);
-    this->pre.clear();
-    this->after.clear();
 }
 
-string myDouble::toStr()
+string toStr(myDouble number)
 {
-    if (!this->pre.empty() && !this->after.empty())
+    if (!number.pre.empty() && !number.after.empty())
     {
-        stringstream ss;
-        string converted = (this->sign == true) ? "" : "-";
-        copy(this->pre.begin(), this->pre.end(), ostream_iterator<int>(ss));
+        ostringstream ss;
+        string converted = (number.sign == true) ? "" : "-";
+        copy(number.pre.begin(), number.pre.end(), ostream_iterator<int>(ss));
         converted += ss.str();
         ss.str(".");
         converted += ss.str();
-        copy(this->after.begin(), this->after.end(), ostream_iterator<int>(ss));
+        copy(number.after.begin(), number.after.end(), ostream_iterator<int>(ss));
         converted += ss.str();
 
         return converted;
     }
+
     return NULL;
+}
+
+myDouble convert(string number)
+{
+    myDouble value;
+    if (number[0] == '-')
+    {
+        value.sign = false;
+        number = number.substr(1, number.length() - 1);
+    }
+    else
+    {
+        value.sign = true;
+    }
+    size_t pointPos = number.find(".");
+    value.pre[0] = number[0] - '0';
+    value.after[0] = number[pointPos + 1] - '0';
+    for (size_t i = 1; i < pointPos; i++)
+    {
+        value.pre.push_back(number[i] - '0');
+    }
+    for (size_t i = pointPos + 2; i < number.length(); i++)
+    {
+        value.after.push_back(number[i] - '0');
+    }
+
+    return value;
 }
 
 int main()
 {
     myDouble a;
-    cout << a.toStr() << "\n";
-
+    cout << toStr(a) << "\n";
+    a = convert("-12345.48974");
+    cout << toStr(a);
     return 0;
 }
