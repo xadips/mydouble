@@ -261,10 +261,6 @@ string myDouble::toStr()
 
 int main()
 {
-    myDouble a, b, c;
-    a = convert("100.22000");
-    b = convert("-12.12");
-    c = a + b;
-    cout << c.toStr() << "\n";
+
     return 0;
 }
