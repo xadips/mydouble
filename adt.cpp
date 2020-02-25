@@ -8,6 +8,8 @@
 
 using namespace std;
 
+bool isSmaller(string n1, string n2);
+
 class myDouble
 {
 public:
@@ -17,12 +19,26 @@ public:
 
     myDouble();
     ~myDouble();
+    void clip();
     string toStr();
-    myDouble operator+(myDouble &obj)
-    {
-        myDouble result;
-        int carry = 0, sum;
 
+    myDouble operator+(myDouble obj)
+    {
+        myDouble result, temp;
+        temp.sign = sign;
+        temp.pre = pre;
+        temp.after = after;
+        if (sign == false && obj.sign == true)
+        {
+            temp.sign = true;
+            return obj - temp;
+        }
+        if (sign == true && obj.sign == false)
+        {
+            obj.sign = true;
+            return temp - obj;
+        }
+        int carry = 0, sum;
         after.resize(max(after.size(), obj.after.size()), 0);
         obj.after.resize(max(after.size(), obj.after.size()), 0);
 
@@ -39,28 +55,9 @@ public:
             result.after[i] = sum % 10;
             carry = sum / 10;
         }
-        // Check if there's something to carry on to the integer part of the number
-        if (carry != 0)
-        {
-            result.pre[0] += carry;
-            int i;
-            carry = 0;
-            for (i = result.pre.size() - 1; result.pre[i] > 9 && i > 0; i--)
-            {
-                carry = result.pre[i] / 10;
-                result.pre[i] %= 10;
-                result.pre[i - 1] += carry;
-            }
-            if (carry != 0)
-            {
-                result.pre[i] %= 10;
-                result.pre[0] = carry;
-            }
-        }
-        carry = 0;
         for (int i = 0; i < result.pre.size(); i++)
         {
-            sum = pre[i] + obj.pre[i] + carry + result.pre[i];
+            sum = pre[i] + obj.pre[i] + carry;
             result.pre[i] = sum % 10;
             carry = sum / 10;
         }
@@ -68,40 +65,87 @@ public:
         {
             result.pre.push_back(carry);
         }
+        if (sign == false && obj.sign == false)
+        {
+            result.sign = false;
+        }
+        result.clip();
 
         return result;
     }
-};
 
-myDouble::myDouble()
-{
-    this->sign = true;
-    this->pre.push_back(0);
-    this->after.push_back(0);
-}
-
-myDouble::~myDouble()
-{
-}
-
-string myDouble::toStr()
-{
-    if (!this->pre.empty() && !this->after.empty())
+    myDouble operator-(myDouble obj)
     {
-        ostringstream ss;
-        string converted = (this->sign == true) ? "" : "-";
-        copy(this->pre.rbegin(), this->pre.rend(), ostream_iterator<int>(ss));
-        converted += ss.str();
-        ss.str(".");
-        converted += ss.str();
-        copy(this->after.begin(), this->after.end(), ostream_iterator<int>(ss));
-        converted += ss.str();
+        myDouble result, temp;
+        temp.sign = sign;
+        temp.pre = pre;
+        temp.after = after;
+        if (sign == true && obj.sign == false)
+        {
+            obj.sign = true;
+            return temp + obj;
+        }
+        else if (sign == false && obj.sign == true)
+        {
+            obj.sign = false;
+            return temp + obj;
+        }
+        else if (sign == false && obj.sign == false)
+        {
+            obj.sign = true;
+            temp.sign = true;
+            return obj - temp;
+        }
+        else
+        {
+            result.sign = true;
+            if (isSmaller(temp.toStr(), obj.toStr()))
+            {
+                swap(temp, obj);
+                result.sign = false;
+            }
+            temp.after.resize(max(temp.after.size(), obj.after.size()), 0);
 
-        return converted;
+            obj.pre.resize(temp.pre.size(), 0);
+            obj.after.resize(max(temp.after.size(), obj.after.size()), 0);
+
+            result.pre.resize(temp.pre.size(), 0);
+            result.after.resize(max(temp.after.size(), obj.after.size()), 0);
+            int subtract, carry = 0;
+            for (int i = result.after.size() - 1; i >= 0; i--)
+            {
+                subtract = temp.after[i] - obj.after[i] - carry;
+                if (subtract < 0)
+                {
+                    subtract += 10;
+                    carry = 1;
+                }
+                else
+                {
+                    carry = 0;
+                }
+                result.after[i] = subtract;
+            }
+            int i;
+            for (i = 0; i < result.pre.size(); i++)
+            {
+                subtract = temp.pre[i] - obj.pre[i] - carry;
+                if (subtract < 0)
+                {
+                    subtract += 10;
+                    carry = 1;
+                }
+                else
+                {
+                    carry = 0;
+                }
+                result.pre[i] = subtract;
+            }
+        }
+        result.clip();
+        return result;
     }
-
-    return NULL;
-}
+};
 
 myDouble convert(string number)
 {
@@ -130,16 +174,97 @@ myDouble convert(string number)
     return value;
 }
 
+bool isSmaller(string str1, string str2)
+{
+    myDouble n1 = convert(str1), n2 = convert(str2);
+    if (n1.pre.size() < n2.pre.size())
+    {
+        return true;
+    }
+    if (n1.pre.size() > n2.pre.size())
+    {
+        return false;
+    }
+    else
+    {
+        for (int i = n1.pre.size() - 1; i >= 0; i--)
+        {
+            if (n1.pre[i] < n2.pre[i])
+            {
+                return true;
+            }
+            if (n1.pre[i] > n2.pre[i])
+            {
+                return false;
+            }
+        }
+        for (int i = 0; i < min(n1.after.size(), n2.after.size()); i++)
+        {
+            if (n1.after[i] < n2.after[i])
+            {
+                return true;
+            }
+            if (n1.after[i] > n2.after[i])
+            {
+                return false;
+            }
+        }
+        return n1.after.size() < n2.after.size() ? true : false;
+    }
+
+    return false;
+}
+
+myDouble::myDouble()
+{
+    this->sign = true;
+    this->pre.push_back(0);
+    this->after.push_back(0);
+}
+
+myDouble::~myDouble()
+{
+}
+
+void myDouble::clip()
+{
+    for (int i = this->pre.size() - 1; i > 0 && this->pre[i] == 0; i--)
+    {
+        this->pre.pop_back();
+    }
+    for (int i = this->after.size() - 1; i > 0 && this->after[i] == 0; i--)
+    {
+        this->after.pop_back();
+    }
+
+    return;
+}
+
+string myDouble::toStr()
+{
+    if (!this->pre.empty() && !this->after.empty())
+    {
+        ostringstream ss;
+        string converted = (this->sign == true) ? "" : "-";
+        copy(this->pre.rbegin(), this->pre.rend(), ostream_iterator<int>(ss));
+        converted += ss.str();
+        ss.str(".");
+        converted += ss.str();
+        copy(this->after.begin(), this->after.end(), ostream_iterator<int>(ss));
+        converted += ss.str();
+
+        return converted;
+    }
+
+    return NULL;
+}
+
 int main()
 {
     myDouble a, b, c;
-    a = convert("9945.9679");
-    b = convert("9945.0689");
-    long double d = 9945.9679;
-    long double e = 9945.0689;
-    long double f = d + e;
+    a = convert("100.22000");
+    b = convert("-12.12");
     c = a + b;
     cout << c.toStr() << "\n";
-    cout << fixed << f;
     return 0;
 }
