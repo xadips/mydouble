@@ -145,6 +145,123 @@ public:
         result.clip();
         return result;
     }
+
+    myDouble operator*(myDouble obj)
+    {
+        myDouble result, temp, middle;
+        clip();
+        obj.clip();
+        int multiplication, carry = 0;
+        result.pre.resize(pre.size() + obj.pre.size(), 0);
+        result.after.resize(after.size() + obj.after.size(), 0);
+        int j;
+        for (int i = after.size() - 1; i >= 0; i--)
+        {
+
+            for (j = obj.after.size() - 1; j >= 0; j--)
+            {
+                multiplication = after[i] * obj.after[j] + result.after[i + j + 1] + carry;
+                carry = multiplication / 10;
+                result.after[i + j + 1] = multiplication % 10;
+            }
+            if (carry > 0)
+            {
+                result.after[i + j + 1] += carry;
+            }
+            carry = 0;
+        }
+        temp.pre[0] = obj.after[obj.after.size() - 1];
+        for (int i = obj.after.size() - 2; i >= 0; i--)
+        {
+            temp.pre.push_back(obj.after[i]);
+        }
+        middle.pre.resize(pre.size() + temp.pre.size(), 0);
+        for (int i = 0; i < pre.size(); i++)
+        {
+
+            for (j = 0; j < temp.pre.size(); j++)
+            {
+                multiplication = pre[i] * temp.pre[j] + middle.pre[i + j] + carry;
+                carry = multiplication / 10;
+                middle.pre[i + j] = multiplication % 10;
+            }
+            if (carry > 0)
+            {
+                middle.pre[i + j] += carry;
+            }
+            carry = 0;
+        }
+        middle.after[0] = middle.pre[temp.pre.size() - 1];
+        for (int i = temp.pre.size() - 2; i >= 0; i--)
+        {
+            middle.after.push_back(middle.pre[i]);
+        }
+        middle.pre.erase(middle.pre.begin(), middle.pre.begin() + temp.pre.size());
+        result = result + middle;
+
+        temp.pre.clear();
+        temp.after.clear();
+        middle.pre.clear();
+        middle.after.clear();
+
+        for (int i = after.size() - 1; i >= 0; i--)
+        {
+            temp.pre.push_back(after[i]);
+        }
+        middle.pre.resize(obj.pre.size() + temp.pre.size(), 0);
+        for (int i = 0; i < obj.pre.size(); i++)
+        {
+
+            for (j = 0; j < temp.pre.size(); j++)
+            {
+                multiplication = obj.pre[i] * temp.pre[j] + middle.pre[i + j] + carry;
+                carry = multiplication / 10;
+                middle.pre[i + j] = multiplication % 10;
+            }
+            if (carry > 0)
+            {
+                middle.pre[i + j] += carry;
+            }
+            carry = 0;
+        }
+        for (int i = temp.pre.size() - 1; i >= 0; i--)
+        {
+            middle.after.push_back(middle.pre[i]);
+        }
+        middle.pre.erase(middle.pre.begin(), middle.pre.begin() + temp.pre.size());
+        result = result + middle;
+
+        middle.pre.clear();
+        middle.after.clear();
+        middle.after.push_back(0);
+        middle.pre.resize(pre.size() + obj.pre.size(), 0);
+        for (int i = 0; i < pre.size(); i++)
+        {
+
+            for (j = 0; j < obj.pre.size(); j++)
+            {
+                multiplication = pre[i] * obj.pre[j] + middle.pre[i + j] + carry;
+                carry = multiplication / 10;
+                middle.pre[i + j] = multiplication % 10;
+            }
+            if (carry > 0)
+            {
+                middle.pre[i + j] += carry;
+            }
+            carry = 0;
+        }
+        result = result + middle;
+        result.clip();
+        if (sign == obj.sign)
+        {
+            result.sign = true;
+        }
+        else
+        {
+            result.sign = false;
+        }
+        return result;
+    }
 };
 
 myDouble convert(string number)
@@ -261,6 +378,8 @@ string myDouble::toStr()
 
 int main()
 {
+    myDouble a = convert("894798489.894984894"), b = convert("894984984984.89416567854178451");
+    cout << (a * b).toStr() << "\n";
 
     return 0;
 }
